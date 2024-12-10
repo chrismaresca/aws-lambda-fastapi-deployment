@@ -1,0 +1,1184 @@
+{
+  "/Users/chrismaresca/ai-eng/aws/fastapi-lambda-test-deploy": {
+    "versionSfCore": null,
+    "versionFramework": "4.4.11",
+    "isWithinCompose": false,
+    "isCompose": false,
+    "composeOrgName": null,
+    "composeResolverProviders": {
+      "default-aws-credential-resolver": "<REDACTED>",
+      "opt": {
+        "instance": {
+          "credentials": "<REDACTED>",
+          "serviceConfigFile": {
+            "service": "fastapi-lambda-test-deploy",
+            "plugins": [
+              "serverless-python-requirements"
+            ],
+            "custom": {
+              "pythonRequirements": {
+                "dockerizePip": "non-linux"
+              }
+            },
+            "provider": {
+              "name": "aws",
+              "architecture": "x86_64",
+              "runtime": "python3.13",
+              "timeout": 30,
+              "region": "us-east-1",
+              "logRetentionInDays": 14,
+              "environment": {
+                "ENVIRONMENT": "production"
+              },
+              "stage": "production",
+              "versionFunctions": true,
+              "compiledCloudFormationTemplate": {
+                "AWSTemplateFormatVersion": "2010-09-09",
+                "Description": "The AWS CloudFormation template for this Serverless application",
+                "Resources": {
+                  "AppLogGroup": {
+                    "Type": "AWS::Logs::LogGroup",
+                    "Properties": {
+                      "LogGroupName": "/aws/lambda/fastapi-lambda-test-deploy-production-app",
+                      "RetentionInDays": 14
+                    }
+                  },
+                  "IamRoleLambdaExecution": {
+                    "Type": "AWS::IAM::Role",
+                    "Properties": {
+                      "AssumeRolePolicyDocument": {
+                        "Version": "2012-10-17",
+                        "Statement": [
+                          {
+                            "Effect": "Allow",
+                            "Principal": {
+                              "Service": [
+                                "lambda.amazonaws.com"
+                              ]
+                            },
+                            "Action": [
+                              "sts:AssumeRole"
+                            ]
+                          }
+                        ]
+                      },
+                      "Policies": [
+                        {
+                          "PolicyName": {
+                            "Fn::Join": [
+                              "-",
+                              [
+                                "fastapi-lambda-test-deploy",
+                                "production",
+                                "lambda"
+                              ]
+                            ]
+                          },
+                          "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                              {
+                                "Effect": "Allow",
+                                "Action": [
+                                  "logs:CreateLogStream",
+                                  "logs:CreateLogGroup",
+                                  "logs:TagResource"
+                                ],
+                                "Resource": [
+                                  {
+                                    "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/fastapi-lambda-test-deploy-production*:*"
+                                  }
+                                ]
+                              },
+                              {
+                                "Effect": "Allow",
+                                "Action": [
+                                  "logs:PutLogEvents"
+                                ],
+                                "Resource": [
+                                  {
+                                    "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/fastapi-lambda-test-deploy-production*:*:*"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ],
+                      "Path": "/",
+                      "RoleName": {
+                        "Fn::Join": [
+                          "-",
+                          [
+                            "fastapi-lambda-test-deploy",
+                            "production",
+                            {
+                              "Ref": "AWS::Region"
+                            },
+                            "lambdaRole"
+                          ]
+                        ]
+                      }
+                    }
+                  },
+                  "AppLambdaFunction": {
+                    "Type": "AWS::Lambda::Function",
+                    "Properties": {
+                      "Code": {
+                        "S3Bucket": "serverless-framework-deployments-us-east-1-c40e88e4-ce7c",
+                        "S3Key": "serverless/fastapi-lambda-test-deploy/production/1732363869657-2024-11-23T12:11:09.657Z/fastapi-lambda-test-deploy.zip"
+                      },
+                      "Handler": "main.app",
+                      "Runtime": "python3.13",
+                      "FunctionName": "fastapi-lambda-test-deploy-production-app",
+                      "MemorySize": 1024,
+                      "Timeout": 30,
+                      "Architectures": [
+                        "x86_64"
+                      ],
+                      "Environment": {
+                        "Variables": {
+                          "ENVIRONMENT": "production"
+                        }
+                      },
+                      "Role": {
+                        "Fn::GetAtt": [
+                          "IamRoleLambdaExecution",
+                          "Arn"
+                        ]
+                      }
+                    },
+                    "DependsOn": [
+                      "AppLogGroup"
+                    ]
+                  },
+                  "AppLambdaVersion0LVBTseUjDXgegIGAKv1zoyHI37ZVibcKfEcsPpDNY": {
+                    "Type": "AWS::Lambda::Version",
+                    "DeletionPolicy": "Retain",
+                    "Properties": {
+                      "FunctionName": {
+                        "Ref": "AppLambdaFunction"
+                      },
+                      "CodeSha256": "hso90nvM4gBE9YR6aRPOrux/m6NgSt6MzLTTdy0K6tA="
+                    }
+                  },
+                  "HttpApi": {
+                    "Type": "AWS::ApiGatewayV2::Api",
+                    "Properties": {
+                      "Name": "production-fastapi-lambda-test-deploy",
+                      "ProtocolType": "HTTP"
+                    }
+                  },
+                  "HttpApiStage": {
+                    "Type": "AWS::ApiGatewayV2::Stage",
+                    "Properties": {
+                      "ApiId": {
+                        "Ref": "HttpApi"
+                      },
+                      "StageName": "$default",
+                      "AutoDeploy": true,
+                      "DefaultRouteSettings": {
+                        "DetailedMetricsEnabled": false
+                      }
+                    }
+                  },
+                  "AppLambdaPermissionHttpApi": {
+                    "Type": "AWS::Lambda::Permission",
+                    "Properties": {
+                      "FunctionName": {
+                        "Fn::GetAtt": [
+                          "AppLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "Action": "lambda:InvokeFunction",
+                      "Principal": "apigateway.amazonaws.com",
+                      "SourceArn": {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                              "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                              "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                              "Ref": "HttpApi"
+                            },
+                            "/*"
+                          ]
+                        ]
+                      }
+                    }
+                  },
+                  "HttpApiIntegrationApp": {
+                    "Type": "AWS::ApiGatewayV2::Integration",
+                    "Properties": {
+                      "ApiId": {
+                        "Ref": "HttpApi"
+                      },
+                      "IntegrationType": "AWS_PROXY",
+                      "IntegrationUri": {
+                        "Fn::GetAtt": [
+                          "AppLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "PayloadFormatVersion": "2.0",
+                      "TimeoutInMillis": 30000
+                    }
+                  },
+                  "HttpApiRouteAnyProxyVar": {
+                    "Type": "AWS::ApiGatewayV2::Route",
+                    "Properties": {
+                      "ApiId": {
+                        "Ref": "HttpApi"
+                      },
+                      "RouteKey": "ANY /{proxy+}",
+                      "Target": {
+                        "Fn::Join": [
+                          "/",
+                          [
+                            "integrations",
+                            {
+                              "Ref": "HttpApiIntegrationApp"
+                            }
+                          ]
+                        ]
+                      }
+                    },
+                    "DependsOn": "HttpApiIntegrationApp"
+                  },
+                  "HttpApiRouteAny": {
+                    "Type": "AWS::ApiGatewayV2::Route",
+                    "Properties": {
+                      "ApiId": {
+                        "Ref": "HttpApi"
+                      },
+                      "RouteKey": "ANY /",
+                      "Target": {
+                        "Fn::Join": [
+                          "/",
+                          [
+                            "integrations",
+                            {
+                              "Ref": "HttpApiIntegrationApp"
+                            }
+                          ]
+                        ]
+                      }
+                    },
+                    "DependsOn": "HttpApiIntegrationApp"
+                  }
+                },
+                "Outputs": {
+                  "ServerlessDeploymentBucketName": {
+                    "Value": "serverless-framework-deployments-us-east-1-c40e88e4-ce7c",
+                    "Export": {
+                      "Name": "sls-fastapi-lambda-test-deploy-production-ServerlessDeploymentBucketName"
+                    }
+                  },
+                  "AppLambdaFunctionQualifiedArn": {
+                    "Description": "Current Lambda function version",
+                    "Value": {
+                      "Ref": "AppLambdaVersion0LVBTseUjDXgegIGAKv1zoyHI37ZVibcKfEcsPpDNY"
+                    },
+                    "Export": {
+                      "Name": "sls-fastapi-lambda-test-deploy-production-AppLambdaFunctionQualifiedArn"
+                    }
+                  },
+                  "HttpApiId": {
+                    "Description": "Id of the HTTP API",
+                    "Value": {
+                      "Ref": "HttpApi"
+                    },
+                    "Export": {
+                      "Name": "sls-fastapi-lambda-test-deploy-production-HttpApiId"
+                    }
+                  },
+                  "HttpApiUrl": {
+                    "Description": "URL of the HTTP API",
+                    "Value": {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "https://",
+                          {
+                            "Ref": "HttpApi"
+                          },
+                          ".execute-api.",
+                          {
+                            "Ref": "AWS::Region"
+                          },
+                          ".",
+                          {
+                            "Ref": "AWS::URLSuffix"
+                          }
+                        ]
+                      ]
+                    },
+                    "Export": {
+                      "Name": "sls-fastapi-lambda-test-deploy-production-HttpApiUrl"
+                    }
+                  }
+                }
+              },
+              "vpc": {}
+            },
+            "functions": {
+              "app": {
+                "handler": "main.app",
+                "events": [
+                  {
+                    "httpApi": {
+                      "method": "ANY",
+                      "path": "/{proxy+}"
+                    },
+                    "resolvedMethod": "ANY",
+                    "resolvedPath": "/{proxy+}"
+                  },
+                  {
+                    "httpApi": {
+                      "method": "ANY",
+                      "path": "/"
+                    },
+                    "resolvedMethod": "ANY",
+                    "resolvedPath": "/"
+                  }
+                ],
+                "name": "fastapi-lambda-test-deploy-production-app",
+                "package": {},
+                "memory": 1024,
+                "timeout": 30,
+                "runtime": "python3.13",
+                "vpc": {},
+                "versionLogicalId": "AppLambdaVersion0LVBTseUjDXgegIGAKv1zoyHI37ZVibcKfEcsPpDNY"
+              }
+            }
+          },
+          "configFileDirPath": "/Users/chrismaresca/ai-eng/aws/fastapi-lambda-test-deploy",
+          "config": {
+            "type": "opt"
+          },
+          "options": {
+            "stage": "production"
+          },
+          "stage": "production",
+          "dashboard": null,
+          "logger": {
+            "namespace": "s:core:resolver:opt",
+            "prefix": null,
+            "prefixColor": null
+          },
+          "_credentialsPromise": "<REDACTED>"
+        },
+        "resolvers": {}
+      },
+      "sls": {
+        "instance": {
+          "credentials": "<REDACTED>",
+          "serviceConfigFile": {
+            "service": "fastapi-lambda-test-deploy",
+            "plugins": [
+              "serverless-python-requirements"
+            ],
+            "custom": {
+              "pythonRequirements": {
+                "dockerizePip": "non-linux"
+              }
+            },
+            "provider": {
+              "name": "aws",
+              "architecture": "x86_64",
+              "runtime": "python3.13",
+              "timeout": 30,
+              "region": "us-east-1",
+              "logRetentionInDays": 14,
+              "environment": {
+                "ENVIRONMENT": "production"
+              },
+              "stage": "production",
+              "versionFunctions": true,
+              "compiledCloudFormationTemplate": {
+                "AWSTemplateFormatVersion": "2010-09-09",
+                "Description": "The AWS CloudFormation template for this Serverless application",
+                "Resources": {
+                  "AppLogGroup": {
+                    "Type": "AWS::Logs::LogGroup",
+                    "Properties": {
+                      "LogGroupName": "/aws/lambda/fastapi-lambda-test-deploy-production-app",
+                      "RetentionInDays": 14
+                    }
+                  },
+                  "IamRoleLambdaExecution": {
+                    "Type": "AWS::IAM::Role",
+                    "Properties": {
+                      "AssumeRolePolicyDocument": {
+                        "Version": "2012-10-17",
+                        "Statement": [
+                          {
+                            "Effect": "Allow",
+                            "Principal": {
+                              "Service": [
+                                "lambda.amazonaws.com"
+                              ]
+                            },
+                            "Action": [
+                              "sts:AssumeRole"
+                            ]
+                          }
+                        ]
+                      },
+                      "Policies": [
+                        {
+                          "PolicyName": {
+                            "Fn::Join": [
+                              "-",
+                              [
+                                "fastapi-lambda-test-deploy",
+                                "production",
+                                "lambda"
+                              ]
+                            ]
+                          },
+                          "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                              {
+                                "Effect": "Allow",
+                                "Action": [
+                                  "logs:CreateLogStream",
+                                  "logs:CreateLogGroup",
+                                  "logs:TagResource"
+                                ],
+                                "Resource": [
+                                  {
+                                    "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/fastapi-lambda-test-deploy-production*:*"
+                                  }
+                                ]
+                              },
+                              {
+                                "Effect": "Allow",
+                                "Action": [
+                                  "logs:PutLogEvents"
+                                ],
+                                "Resource": [
+                                  {
+                                    "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/fastapi-lambda-test-deploy-production*:*:*"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ],
+                      "Path": "/",
+                      "RoleName": {
+                        "Fn::Join": [
+                          "-",
+                          [
+                            "fastapi-lambda-test-deploy",
+                            "production",
+                            {
+                              "Ref": "AWS::Region"
+                            },
+                            "lambdaRole"
+                          ]
+                        ]
+                      }
+                    }
+                  },
+                  "AppLambdaFunction": {
+                    "Type": "AWS::Lambda::Function",
+                    "Properties": {
+                      "Code": {
+                        "S3Bucket": "serverless-framework-deployments-us-east-1-c40e88e4-ce7c",
+                        "S3Key": "serverless/fastapi-lambda-test-deploy/production/1732363869657-2024-11-23T12:11:09.657Z/fastapi-lambda-test-deploy.zip"
+                      },
+                      "Handler": "main.app",
+                      "Runtime": "python3.13",
+                      "FunctionName": "fastapi-lambda-test-deploy-production-app",
+                      "MemorySize": 1024,
+                      "Timeout": 30,
+                      "Architectures": [
+                        "x86_64"
+                      ],
+                      "Environment": {
+                        "Variables": {
+                          "ENVIRONMENT": "production"
+                        }
+                      },
+                      "Role": {
+                        "Fn::GetAtt": [
+                          "IamRoleLambdaExecution",
+                          "Arn"
+                        ]
+                      }
+                    },
+                    "DependsOn": [
+                      "AppLogGroup"
+                    ]
+                  },
+                  "AppLambdaVersion0LVBTseUjDXgegIGAKv1zoyHI37ZVibcKfEcsPpDNY": {
+                    "Type": "AWS::Lambda::Version",
+                    "DeletionPolicy": "Retain",
+                    "Properties": {
+                      "FunctionName": {
+                        "Ref": "AppLambdaFunction"
+                      },
+                      "CodeSha256": "hso90nvM4gBE9YR6aRPOrux/m6NgSt6MzLTTdy0K6tA="
+                    }
+                  },
+                  "HttpApi": {
+                    "Type": "AWS::ApiGatewayV2::Api",
+                    "Properties": {
+                      "Name": "production-fastapi-lambda-test-deploy",
+                      "ProtocolType": "HTTP"
+                    }
+                  },
+                  "HttpApiStage": {
+                    "Type": "AWS::ApiGatewayV2::Stage",
+                    "Properties": {
+                      "ApiId": {
+                        "Ref": "HttpApi"
+                      },
+                      "StageName": "$default",
+                      "AutoDeploy": true,
+                      "DefaultRouteSettings": {
+                        "DetailedMetricsEnabled": false
+                      }
+                    }
+                  },
+                  "AppLambdaPermissionHttpApi": {
+                    "Type": "AWS::Lambda::Permission",
+                    "Properties": {
+                      "FunctionName": {
+                        "Fn::GetAtt": [
+                          "AppLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "Action": "lambda:InvokeFunction",
+                      "Principal": "apigateway.amazonaws.com",
+                      "SourceArn": {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                              "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                              "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                              "Ref": "HttpApi"
+                            },
+                            "/*"
+                          ]
+                        ]
+                      }
+                    }
+                  },
+                  "HttpApiIntegrationApp": {
+                    "Type": "AWS::ApiGatewayV2::Integration",
+                    "Properties": {
+                      "ApiId": {
+                        "Ref": "HttpApi"
+                      },
+                      "IntegrationType": "AWS_PROXY",
+                      "IntegrationUri": {
+                        "Fn::GetAtt": [
+                          "AppLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "PayloadFormatVersion": "2.0",
+                      "TimeoutInMillis": 30000
+                    }
+                  },
+                  "HttpApiRouteAnyProxyVar": {
+                    "Type": "AWS::ApiGatewayV2::Route",
+                    "Properties": {
+                      "ApiId": {
+                        "Ref": "HttpApi"
+                      },
+                      "RouteKey": "ANY /{proxy+}",
+                      "Target": {
+                        "Fn::Join": [
+                          "/",
+                          [
+                            "integrations",
+                            {
+                              "Ref": "HttpApiIntegrationApp"
+                            }
+                          ]
+                        ]
+                      }
+                    },
+                    "DependsOn": "HttpApiIntegrationApp"
+                  },
+                  "HttpApiRouteAny": {
+                    "Type": "AWS::ApiGatewayV2::Route",
+                    "Properties": {
+                      "ApiId": {
+                        "Ref": "HttpApi"
+                      },
+                      "RouteKey": "ANY /",
+                      "Target": {
+                        "Fn::Join": [
+                          "/",
+                          [
+                            "integrations",
+                            {
+                              "Ref": "HttpApiIntegrationApp"
+                            }
+                          ]
+                        ]
+                      }
+                    },
+                    "DependsOn": "HttpApiIntegrationApp"
+                  }
+                },
+                "Outputs": {
+                  "ServerlessDeploymentBucketName": {
+                    "Value": "serverless-framework-deployments-us-east-1-c40e88e4-ce7c",
+                    "Export": {
+                      "Name": "sls-fastapi-lambda-test-deploy-production-ServerlessDeploymentBucketName"
+                    }
+                  },
+                  "AppLambdaFunctionQualifiedArn": {
+                    "Description": "Current Lambda function version",
+                    "Value": {
+                      "Ref": "AppLambdaVersion0LVBTseUjDXgegIGAKv1zoyHI37ZVibcKfEcsPpDNY"
+                    },
+                    "Export": {
+                      "Name": "sls-fastapi-lambda-test-deploy-production-AppLambdaFunctionQualifiedArn"
+                    }
+                  },
+                  "HttpApiId": {
+                    "Description": "Id of the HTTP API",
+                    "Value": {
+                      "Ref": "HttpApi"
+                    },
+                    "Export": {
+                      "Name": "sls-fastapi-lambda-test-deploy-production-HttpApiId"
+                    }
+                  },
+                  "HttpApiUrl": {
+                    "Description": "URL of the HTTP API",
+                    "Value": {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "https://",
+                          {
+                            "Ref": "HttpApi"
+                          },
+                          ".execute-api.",
+                          {
+                            "Ref": "AWS::Region"
+                          },
+                          ".",
+                          {
+                            "Ref": "AWS::URLSuffix"
+                          }
+                        ]
+                      ]
+                    },
+                    "Export": {
+                      "Name": "sls-fastapi-lambda-test-deploy-production-HttpApiUrl"
+                    }
+                  }
+                }
+              },
+              "vpc": {}
+            },
+            "functions": {
+              "app": {
+                "handler": "main.app",
+                "events": [
+                  {
+                    "httpApi": {
+                      "method": "ANY",
+                      "path": "/{proxy+}"
+                    },
+                    "resolvedMethod": "ANY",
+                    "resolvedPath": "/{proxy+}"
+                  },
+                  {
+                    "httpApi": {
+                      "method": "ANY",
+                      "path": "/"
+                    },
+                    "resolvedMethod": "ANY",
+                    "resolvedPath": "/"
+                  }
+                ],
+                "name": "fastapi-lambda-test-deploy-production-app",
+                "package": {},
+                "memory": 1024,
+                "timeout": 30,
+                "runtime": "python3.13",
+                "vpc": {},
+                "versionLogicalId": "AppLambdaVersion0LVBTseUjDXgegIGAKv1zoyHI37ZVibcKfEcsPpDNY"
+              }
+            }
+          },
+          "configFileDirPath": "/Users/chrismaresca/ai-eng/aws/fastapi-lambda-test-deploy",
+          "config": {
+            "type": "sls"
+          },
+          "options": {
+            "stage": "production"
+          },
+          "stage": "production",
+          "dashboard": null,
+          "logger": {
+            "namespace": "s:core:resolver:sls",
+            "prefix": null,
+            "prefixColor": null
+          },
+          "_credentialsPromise": "<REDACTED>"
+        },
+        "resolvers": {}
+      }
+    },
+    "composeServiceName": null,
+    "servicePath": "/Users/chrismaresca/ai-eng/aws/fastapi-lambda-test-deploy",
+    "serviceConfigFileName": "serverless.yml",
+    "service": {
+      "service": "fastapi-lambda-test-deploy",
+      "plugins": [
+        "serverless-python-requirements"
+      ],
+      "custom": {
+        "pythonRequirements": {
+          "dockerizePip": "non-linux"
+        }
+      },
+      "provider": {
+        "name": "aws",
+        "architecture": "x86_64",
+        "runtime": "python3.13",
+        "timeout": 30,
+        "region": "us-east-1",
+        "logRetentionInDays": 14,
+        "environment": {
+          "ENVIRONMENT": "production"
+        },
+        "stage": "production",
+        "versionFunctions": true,
+        "compiledCloudFormationTemplate": {
+          "AWSTemplateFormatVersion": "2010-09-09",
+          "Description": "The AWS CloudFormation template for this Serverless application",
+          "Resources": {
+            "AppLogGroup": {
+              "Type": "AWS::Logs::LogGroup",
+              "Properties": {
+                "LogGroupName": "/aws/lambda/fastapi-lambda-test-deploy-production-app",
+                "RetentionInDays": 14
+              }
+            },
+            "IamRoleLambdaExecution": {
+              "Type": "AWS::IAM::Role",
+              "Properties": {
+                "AssumeRolePolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Principal": {
+                        "Service": [
+                          "lambda.amazonaws.com"
+                        ]
+                      },
+                      "Action": [
+                        "sts:AssumeRole"
+                      ]
+                    }
+                  ]
+                },
+                "Policies": [
+                  {
+                    "PolicyName": {
+                      "Fn::Join": [
+                        "-",
+                        [
+                          "fastapi-lambda-test-deploy",
+                          "production",
+                          "lambda"
+                        ]
+                      ]
+                    },
+                    "PolicyDocument": {
+                      "Version": "2012-10-17",
+                      "Statement": [
+                        {
+                          "Effect": "Allow",
+                          "Action": [
+                            "logs:CreateLogStream",
+                            "logs:CreateLogGroup",
+                            "logs:TagResource"
+                          ],
+                          "Resource": [
+                            {
+                              "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/fastapi-lambda-test-deploy-production*:*"
+                            }
+                          ]
+                        },
+                        {
+                          "Effect": "Allow",
+                          "Action": [
+                            "logs:PutLogEvents"
+                          ],
+                          "Resource": [
+                            {
+                              "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/fastapi-lambda-test-deploy-production*:*:*"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "Path": "/",
+                "RoleName": {
+                  "Fn::Join": [
+                    "-",
+                    [
+                      "fastapi-lambda-test-deploy",
+                      "production",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      "lambdaRole"
+                    ]
+                  ]
+                }
+              }
+            },
+            "AppLambdaFunction": {
+              "Type": "AWS::Lambda::Function",
+              "Properties": {
+                "Code": {
+                  "S3Bucket": "serverless-framework-deployments-us-east-1-c40e88e4-ce7c",
+                  "S3Key": "serverless/fastapi-lambda-test-deploy/production/1732363869657-2024-11-23T12:11:09.657Z/fastapi-lambda-test-deploy.zip"
+                },
+                "Handler": "main.app",
+                "Runtime": "python3.13",
+                "FunctionName": "fastapi-lambda-test-deploy-production-app",
+                "MemorySize": 1024,
+                "Timeout": 30,
+                "Architectures": [
+                  "x86_64"
+                ],
+                "Environment": {
+                  "Variables": {
+                    "ENVIRONMENT": "production"
+                  }
+                },
+                "Role": {
+                  "Fn::GetAtt": [
+                    "IamRoleLambdaExecution",
+                    "Arn"
+                  ]
+                }
+              },
+              "DependsOn": [
+                "AppLogGroup"
+              ]
+            },
+            "AppLambdaVersion0LVBTseUjDXgegIGAKv1zoyHI37ZVibcKfEcsPpDNY": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "AppLambdaFunction"
+                },
+                "CodeSha256": "hso90nvM4gBE9YR6aRPOrux/m6NgSt6MzLTTdy0K6tA="
+              }
+            },
+            "HttpApi": {
+              "Type": "AWS::ApiGatewayV2::Api",
+              "Properties": {
+                "Name": "production-fastapi-lambda-test-deploy",
+                "ProtocolType": "HTTP"
+              }
+            },
+            "HttpApiStage": {
+              "Type": "AWS::ApiGatewayV2::Stage",
+              "Properties": {
+                "ApiId": {
+                  "Ref": "HttpApi"
+                },
+                "StageName": "$default",
+                "AutoDeploy": true,
+                "DefaultRouteSettings": {
+                  "DetailedMetricsEnabled": false
+                }
+              }
+            },
+            "AppLambdaPermissionHttpApi": {
+              "Type": "AWS::Lambda::Permission",
+              "Properties": {
+                "FunctionName": {
+                  "Fn::GetAtt": [
+                    "AppLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":execute-api:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":",
+                      {
+                        "Ref": "HttpApi"
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              }
+            },
+            "HttpApiIntegrationApp": {
+              "Type": "AWS::ApiGatewayV2::Integration",
+              "Properties": {
+                "ApiId": {
+                  "Ref": "HttpApi"
+                },
+                "IntegrationType": "AWS_PROXY",
+                "IntegrationUri": {
+                  "Fn::GetAtt": [
+                    "AppLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "PayloadFormatVersion": "2.0",
+                "TimeoutInMillis": 30000
+              }
+            },
+            "HttpApiRouteAnyProxyVar": {
+              "Type": "AWS::ApiGatewayV2::Route",
+              "Properties": {
+                "ApiId": {
+                  "Ref": "HttpApi"
+                },
+                "RouteKey": "ANY /{proxy+}",
+                "Target": {
+                  "Fn::Join": [
+                    "/",
+                    [
+                      "integrations",
+                      {
+                        "Ref": "HttpApiIntegrationApp"
+                      }
+                    ]
+                  ]
+                }
+              },
+              "DependsOn": "HttpApiIntegrationApp"
+            },
+            "HttpApiRouteAny": {
+              "Type": "AWS::ApiGatewayV2::Route",
+              "Properties": {
+                "ApiId": {
+                  "Ref": "HttpApi"
+                },
+                "RouteKey": "ANY /",
+                "Target": {
+                  "Fn::Join": [
+                    "/",
+                    [
+                      "integrations",
+                      {
+                        "Ref": "HttpApiIntegrationApp"
+                      }
+                    ]
+                  ]
+                }
+              },
+              "DependsOn": "HttpApiIntegrationApp"
+            }
+          },
+          "Outputs": {
+            "ServerlessDeploymentBucketName": {
+              "Value": "serverless-framework-deployments-us-east-1-c40e88e4-ce7c",
+              "Export": {
+                "Name": "sls-fastapi-lambda-test-deploy-production-ServerlessDeploymentBucketName"
+              }
+            },
+            "AppLambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "AppLambdaVersion0LVBTseUjDXgegIGAKv1zoyHI37ZVibcKfEcsPpDNY"
+              },
+              "Export": {
+                "Name": "sls-fastapi-lambda-test-deploy-production-AppLambdaFunctionQualifiedArn"
+              }
+            },
+            "HttpApiId": {
+              "Description": "Id of the HTTP API",
+              "Value": {
+                "Ref": "HttpApi"
+              },
+              "Export": {
+                "Name": "sls-fastapi-lambda-test-deploy-production-HttpApiId"
+              }
+            },
+            "HttpApiUrl": {
+              "Description": "URL of the HTTP API",
+              "Value": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "https://",
+                    {
+                      "Ref": "HttpApi"
+                    },
+                    ".execute-api.",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ".",
+                    {
+                      "Ref": "AWS::URLSuffix"
+                    }
+                  ]
+                ]
+              },
+              "Export": {
+                "Name": "sls-fastapi-lambda-test-deploy-production-HttpApiUrl"
+              }
+            }
+          }
+        },
+        "vpc": {}
+      },
+      "functions": {
+        "app": {
+          "handler": "main.app",
+          "events": [
+            {
+              "httpApi": {
+                "method": "ANY",
+                "path": "/{proxy+}"
+              },
+              "resolvedMethod": "ANY",
+              "resolvedPath": "/{proxy+}"
+            },
+            {
+              "httpApi": {
+                "method": "ANY",
+                "path": "/"
+              },
+              "resolvedMethod": "ANY",
+              "resolvedPath": "/"
+            }
+          ],
+          "name": "fastapi-lambda-test-deploy-production-app",
+          "package": {},
+          "memory": 1024,
+          "timeout": 30,
+          "runtime": "python3.13",
+          "vpc": {},
+          "versionLogicalId": "AppLambdaVersion0LVBTseUjDXgegIGAKv1zoyHI37ZVibcKfEcsPpDNY"
+        }
+      }
+    },
+    "serviceRawFile": "service: fastapi-lambda-test-deploy\n\nplugins:\n  - serverless-python-requirements\n\ncustom:\n  pythonRequirements:\n    dockerizePip: non-linux\n\nprovider:\n  name: aws\n  architecture: x86_64\n  runtime: python3.13\n  timeout: 30\n  region: us-east-1\n  logRetentionInDays: 14\n\n  environment:\n    ENVIRONMENT: ${opt:stage, 'production'}\n\nfunctions:\n  app:\n    handler: main.app\n    events:\n      - httpApi:\n          method: ANY\n          path: /{proxy+}\n      - httpApi:\n          method: ANY\n          path: /\n",
+    "command": [
+      "deploy"
+    ],
+    "options": {
+      "stage": "production"
+    },
+    "error": null,
+    "params": {},
+    "machineId": "c64b0f08aa4b21b9004264225fade122",
+    "stage": "production",
+    "accessKeyV2": "<REDACTED>",
+    "accessKeyV1": "<REDACTED>",
+    "orgId": "06cc1d9b-7f28-4362-99d9-3051a9403fd0",
+    "orgName": "chrismaresca",
+    "userId": "JbFxrVLJgQwzQJn0Kw",
+    "dashboard": {
+      "isEnabledForService": false,
+      "requiredAuthentication": false,
+      "orgFeaturesInUse": null,
+      "orgObservabilityIntegrations": null,
+      "serviceAppId": null,
+      "serviceProvider": null,
+      "instanceParameters": null
+    },
+    "userName": "chrismaresca",
+    "subscription": null,
+    "userEmail": "chris@chrismaresca.dev",
+    "serviceProviderAwsRegion": "us-east-1",
+    "serviceProviderAwsCredentials": "<REDACTED>",
+    "serviceProviderAwsAccountId": "976193227118",
+    "projectType": "traditional",
+    "versionSf": "4.4.11",
+    "serviceProviderAwsCfStackName": "fastapi-lambda-test-deploy-production",
+    "integrations": {},
+    "serviceUniqueId": "arn:aws:cloudformation:us-east-1:976193227118:stack/fastapi-lambda-test-deploy-production/0df8d210-a990-11ef-8cda-1258302e0921",
+    "serviceProviderAwsCfStackId": "arn:aws:cloudformation:us-east-1:976193227118:stack/fastapi-lambda-test-deploy-production/0df8d210-a990-11ef-8cda-1258302e0921",
+    "serviceProviderAwsCfStackCreated": "2024-11-23T11:42:44.774Z",
+    "serviceProviderAwsCfStackUpdated": "2024-11-23T12:11:22.598Z",
+    "serviceProviderAwsCfStackStatus": "UPDATE_COMPLETE",
+    "serviceProviderAwsCfStackOutputs": [
+      {
+        "OutputKey": "AppLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:us-east-1:976193227118:function:fastapi-lambda-test-deploy-production-app:4",
+        "Description": "Current Lambda function version",
+        "ExportName": "sls-fastapi-lambda-test-deploy-production-AppLambdaFunctionQualifiedArn"
+      },
+      {
+        "OutputKey": "HttpApiId",
+        "OutputValue": "y89hj4dtej",
+        "Description": "Id of the HTTP API",
+        "ExportName": "sls-fastapi-lambda-test-deploy-production-HttpApiId"
+      },
+      {
+        "OutputKey": "ServerlessDeploymentBucketName",
+        "OutputValue": "serverless-framework-deployments-us-east-1-c40e88e4-ce7c",
+        "ExportName": "sls-fastapi-lambda-test-deploy-production-ServerlessDeploymentBucketName"
+      },
+      {
+        "OutputKey": "HttpApiUrl",
+        "OutputValue": "https://y89hj4dtej.execute-api.us-east-1.amazonaws.com",
+        "Description": "URL of the HTTP API",
+        "ExportName": "sls-fastapi-lambda-test-deploy-production-HttpApiUrl"
+      }
+    ]
+  }
+}
